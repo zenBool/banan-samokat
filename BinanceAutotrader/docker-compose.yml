@@ -1,0 +1,86 @@
+# docker-compose.yml
+networks:
+  tradenw:
+
+services:
+  rabbitmq:
+    image: rabbitmq:4.0.2-management
+    hostname: rabbitmq
+    networks:
+      - tradenw
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    volumes:
+#      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - rabbitmq-data:/var/lib/rabbitmq
+    restart: always
+    env_file:
+      - .env
+
+
+#  db:
+#    image: postgres:16
+#    environment:
+#      POSTGRES_USER: user
+#      POSTGRES_PASSWORD: password
+#      POSTGRES_DB: trading_db
+#    ports:
+#      - "5432:5432"
+#    volumes:
+#      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+#    restart: always
+
+  trading_robot:
+    container_name: trader
+    networks:
+      - tradenw
+    build: ./trading-robot
+    depends_on:
+      - rabbitmq
+    environment:
+      - TRADER__RABBITMQ__HOST=rabbitmq
+      - TRADER__DB__URL=${TRADER__DB__URL}
+      - TRADER__BINANCE__API_KEY=${TRADER__BINANCE__API_KEY}
+      - TRADER__BINANCE__API_SECRET=${TRADER__BINANCE__API_SECRET}
+    command: bash -c "uvicorn main:app --host 0.0.0.0 --port 8000"
+    volumes:
+      - ./logs:/app/trading_bot/logs
+    ports:
+      - "8000:8000"
+    restart: always
+    env_file:
+      - .env
+
+#  telegram_bot:
+#    build: ./telegram_bot
+#    depends_on:
+#      - rabbitmq
+#    container_name: telegabot
+#    environment:
+#      - RABBITMQ_HOST=rabbitmq
+#      - TELEGRAM_API_TOKEN=${TELEGRAM_API_TOKEN}
+#      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+#    restart: always
+#    env_file:
+#      - .env
+
+#  web_app:
+#    build: ./web_app
+#    depends_on:
+#      - trading_robot
+##      - db
+#    container_name: webapp
+#    environment:
+#      - DATABASE_URL=${FAPI_DATABASE_URL}
+#    ports:
+#      - "8000:8000"
+#    restart: always
+#    env_file:
+#      - .env
+volumes:
+  rabbitmq-data:
