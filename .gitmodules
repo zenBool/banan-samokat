@@ -1,0 +1,9 @@
+[submodule "BinanceAutotrader/trading-robot"]
+	path = BinanceAutotrader/trading-robot
+	url = git@github.com:zenBool/trading-robot-samokat.git
+[submodule "BinanceAutotrader/telegram-bot"]
+	path = BinanceAutotrader/telegram-bot
+	url = git@github.com:zenBool/telegram-bot-samokat.git
+[submodule "BinanceAutotrader/front-web-app"]
+	path = BinanceAutotrader/front-web-app
+	url = git@github.com:zenBool/front-web-app-samokat.git
