@@ -5,6 +5,8 @@
 .idea/
 **/.idea/
 
+examples/
+
 # Environments
 .env
 .env.*
